@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🥟 Me n Moms | Premium Artisanal Momos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,400&display=swap" rel="stylesheet" />
+
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <!-- Leaflet Control Geocoder CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.css" />
+
+    <style>
+        :root {
+            --primary: #0284c7;
+            --primary-dark: #0f172a;
+            --accent: #f59e0b;
+            --accent-light: #fef3c7;
+            --veg: #10b981;
+            --veg-light: #ecfdf5;
+            --nonveg: #ef4444;
+            --nonveg-light: #fef2f2;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --whatsapp: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(180deg, #f1f5f9 0%, var(--bg) 300px);
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 24px;
+            padding-bottom: 140px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 50px 30px;
+            background: var(--card-bg);
+            border-radius: 32px;
+            margin-bottom: 48px;
+            box-shadow: 0 4px 30px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(15, 23, 42, 0.02);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .logo-wrapper {
+            max-width: 290px;
+            margin: 0 auto 16px auto;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.04));
+        }
+
+        .logo-wrapper svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-dark);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.15rem;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 500;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 36px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 992px) {
+            .menu-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        .category-card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 32px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.02);
+            border: 1px solid rgba(226, 232, 240, 0.7);
+        }
+
+        .category-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem;
+            font-weight: 800;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .veg-title {
+            color: #065f46;
+        }
+        .nonveg-title {
+            color: #991b1b;
+        }
+        .drink-title {
+            color: #1e40af;
+        }
+
+        .category-badge {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 100px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .veg-badge {
+            background: var(--veg-light);
+            color: var(--veg);
+        }
+        .nonveg-badge {
+            background: var(--nonveg-light);
+            color: var(--nonveg);
+        }
+        .drink-badge {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .menu-list {
+            list-style: none;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            margin-bottom: 14px;
+            border-radius: 18px;
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 4px rgba(15, 23, 42, 0.01);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            gap: 16px;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-2px);
+            border-color: #e2e8f0;
+            box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        .item-image {
+            width: 75px;
+            height: 75px;
+            object-fit: cover;
+            border-radius: 12px;
+            background-color: #f1f5f9;
+            flex-shrink: 0;
+        }
+
+        .item-image-fallback {
+            width: 75px;
+            height: 75px;
+            border-radius: 12px;
+            background-color: #f1f5f9;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+        }
+
+        .item-details-block {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-grow: 1;
+        }
+
+        .item-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .item-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--primary-dark);
+        }
+
+        .item-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        .item-price {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 100px;
+            padding: 4px 6px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .quantity-controls:focus-within,
+        .quantity-controls:hover {
+            border-color: #cbd5e1;
+            background: #f1f5f9;
+        }
+
+        .btn-qty {
+            background: #ffffff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+        }
+
+        .btn-qty:hover {
+            background: var(--primary-dark);
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .qty-count {
+            font-weight: 700;
+            font-size: 1.05rem;
+            min-width: 20px;
+            text-align: center;
+            color: var(--primary-dark);
+        }
+
+        /* Floating Call */
+        .floating-call-btn {
+            position: fixed;
+            bottom: 110px;
+            right: 32px;
+            background: linear-gradient(135deg, var(--primary) 0%, #0369a1 100%);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
+            z-index: 999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .floating-call-btn:hover {
+            transform: translateY(-4px) scale(1.03);
+            box-shadow: 0 14px 30px rgba(2, 132, 199, 0.5);
+            background: linear-gradient(135deg, #0ea5e9 0%, var(--primary) 100%);
+        }
+
+        .floating-call-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 100px;
+            box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.6);
+            animation: pulse-ring 1.6s infinite ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 12px rgba(2, 132, 199, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(2, 132, 199, 0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .floating-call-btn {
+                right: 24px;
+                bottom: 115px;
+                padding: 10px 16px;
+                font-size: 0.85rem;
+            }
+            .menu-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .quantity-controls {
+                align-self: flex-end;
+                margin-top: -30px;
+            }
+        }
+
+        /* Cart Strip */
+        .cart-strip {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 48px);
+            max-width: 650px;
+            background: #0f172a;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.25);
+            color: white;
+            padding: 18px 32px;
+            border-radius: 100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cart-details {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cart-count-text {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cart-price-text {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .btn-checkout {
+            background: linear-gradient(135deg, #0ea5e9 0%, var(--primary) 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 100px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 28px;
+            max-width: 540px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 24px;
+            right: 28px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .modal h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: var(--primary-dark);
+        }
+
+        .summary-list {
+            margin-bottom: 24px;
+            border-bottom: 2px dashed #e2e8f0;
+            padding-bottom: 20px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--primary-dark);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        #map {
+            width: 100%;
+            height: 220px;
+            border-radius: 14px;
+            margin-top: 8px;
+            border: 2px solid #cbd5e1;
+            z-index: 1;
+        }
+        .leaflet-control-geocoder {
+            border-radius: 12px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            border: none !important;
+            background: white !important;
+        }
+        .leaflet-control-geocoder-form {
+            display: flex;
+        }
+        .leaflet-control-geocoder-form input {
+            border: none !important;
+            padding: 8px 12px !important;
+            border-radius: 12px 0 0 12px !important;
+            font-size: 0.9rem !important;
+        }
+        .leaflet-control-geocoder-form button {
+            background: var(--primary) !important;
+            border: none !important;
+            border-radius: 0 12px 12px 0 !important;
+            color: white !important;
+            padding: 0 14px !important;
+            font-weight: 600 !important;
+        }
+
+        .map-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .order-type-toggle {
+            display: flex;
+            gap: 10px;
+        }
+
+        .order-type-btn {
+            flex: 1;
+            padding: 12px 10px;
+            border-radius: 14px;
+            border: 2px solid #e2e8f0;
+            background: #ffffff;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .order-type-btn.active {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .qr-section-wrapper {
+            text-align: center;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 20px;
+            border-radius: 18px;
+            margin-bottom: 20px;
+        }
+
+        .qr-image-frame {
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
+        }
+
+        .qr-image-frame img {
+            display: block;
+            width: 160px;
+            height: 160px;
+        }
+
+        .qr-note-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .btn-whatsapp {
+            background: var(--whatsapp);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-whatsapp:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .btn-whatsapp:disabled:hover {
+            transform: none;
+        }
+        .btn-whatsapp:hover {
+            transform: scale(1.01);
+        }
+
+        .pay-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .pay-buttons .btn-checkout {
+            font-size: 0.85rem;
+            padding: 10px 18px;
+        }
+
+        .success-screen {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .success-icon {
+            font-size: 4.5rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .order-badge {
+            background: var(--accent-light);
+            border: 1px solid #fde68a;
+            color: #b45309;
+            padding: 12px 24px;
+            border-radius: 100px;
+            display: inline-block;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .copy-btn {
+            background: #e2e8f0;
+            color: var(--primary-dark);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 100px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .copy-btn:hover {
+            background: #cbd5e1;
+        }
+
+        @media (max-width: 480px) {
+            .category-title {
+                font-size: 1.6rem;
+            }
+            .modal-content {
+                padding: 28px 20px;
+            }
+            .cart-strip {
+                padding: 14px 20px;
+                border-radius: 60px;
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: center;
+            }
+            .btn-checkout {
+                padding: 10px 18px;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating Call Button — updated to 6381320381 -->
+    <a href="tel:6381320381" class="floating-call-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+        </svg>
+        <span>Call Guru Karan</span>
+    </a>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header>
+            <div class="logo-wrapper">
+                <svg viewBox="0 0 360 110" xmlns="http://www.w3.org/2000/svg">
+                    <text x="10" y="70" font-family="'Plus Jakarta Sans', sans-serif" font-size="56" font-weight="800" fill="#0f172a" letter-spacing="-1">me</text>
+                    <ellipse cx="146" cy="54" rx="34" ry="48" fill="#0284c7" transform="rotate(-12 146 54)" />
+                    <text x="131" y="71" font-family="'Playfair Display', serif" font-style="italic" font-size="52" font-weight="800" fill="#ffffff" transform="rotate(-4 146 54)">n</text>
+                    <text x="202" y="70" font-family="'Plus Jakarta Sans', sans-serif" font-size="56" font-weight="800" fill="#0f172a" letter-spacing="-1">moms</text>
+                </svg>
+            </div>
+            <h1>ARTISANAL MOMOS</h1>
+            <p>Fresh ingredients, handcrafted recipes, delivered steaming hot to your doorstep.</p>
+        </header>
+
+        <!-- MENU GRID -->
+        <div class="menu-grid">
+
+            <!-- VEG SPECIALTIES -->
+            <div class="category-card">
+                <div class="category-title veg-title">
+                    <span>🌱 Veg Specialties</span>
+                    <span class="category-badge veg-badge">100% Green</span>
+                </div>
+                <ul class="menu-list">
+                    <li class="menu-item" data-name="Spicy Veggie Momos" data-price="80">
+                        <div class="item-details-block">
+                            <img src="WhatsApp Image 2026-07-14 at 8.15.02 PM.jpeg" alt="Spicy Veggie Momos" class="item-image" onerror="this.style.display='none'">
+                            <div class="item-info">
+                                <span class="item-name">🌶️ Spicy Veggie Momos</span>
+                                <span class="item-desc">Rich filling · 100% Veg</span>
+                                <span class="item-price">₹80</span>
+                            </div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                            <span class="qty-count">0</span>
+                            <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                        </div>
+                    </li>
+                    <li class="menu-item" data-name="Paneer Momos" data-price="80">
+                        <div class="item-details-block">
+                            <img src="WhatsApp Image 2026-07-14 at 8.15.03 PM.jpeg" alt="Paneer Momos" class="item-image" onerror="this.style.display='none'">
+                            <div class="item-info">
+                                <span class="item-name">🧀 Paneer Momos</span>
+                                <span class="item-desc">Creamy cottage cheese filling</span>
+                                <span class="item-price">₹80</span>
+                            </div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                            <span class="qty-count">0</span>
+                            <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- NON-VEG CLASSICS -->
+            <div class="category-card">
+                <div class="category-title nonveg-title">
+                    <span>🍗 Non-Veg Classics</span>
+                    <span class="category-badge nonveg-badge">Fresh Poultry</span>
+                </div>
+                <ul class="menu-list">
+                    <li class="menu-item" data-name="Chicken Momos" data-price="80">
+                        <div class="item-details-block">
+                            <img src="WhatsApp Image 2026-07-14 at 8.15.04 PM (2).jpeg" alt="Chicken Momos" class="item-image" onerror="this.style.display='none'">
+                            <div class="item-info">
+                                <span class="item-name">🐔 Chicken Momos</span>
+                                <span class="item-desc">Protein rich &amp; delicious</span>
+                                <span class="item-price">₹80</span>
+                            </div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                            <span class="qty-count">0</span>
+                            <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                        </div>
+                    </li>
+                    <li class="menu-item" data-name="Crispy Chicken" data-price="80">
+                        <div class="item-details-block">
+                            <img src="WhatsApp Image 2026-07-14 at 8.15.04 PM.jpeg" alt="Crispy Chicken" class="item-image" onerror="this.style.display='none'">
+                            <div class="item-info">
+                                <span class="item-name">🍗 Crispy Chicken</span>
+                                <span class="item-desc">Super crunchy! · Today's Special</span>
+                                <span class="item-price">₹80</span>
+                            </div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                            <span class="qty-count">0</span>
+                            <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- DRINKS & SIDES -->
+        <div class="category-card drinks-section" style="margin-top:0;">
+            <div class="category-title drink-title">
+                <span>🥤 Drinks &amp; Sides</span>
+                <span class="category-badge drink-badge">Refreshing</span>
+            </div>
+            <ul class="menu-list" style="display:flex; flex-wrap:wrap; gap:14px; list-style:none;">
+                <li class="menu-item" data-name="Mojito" data-price="70" style="flex:1 1 200px; margin-bottom:0;">
+                    <div class="item-details-block">
+                        <img src="WhatsApp Image 2026-07-14 at 8.15.03 PM (1).jpeg" alt="Mojito" class="item-image" onerror="this.style.display='none'">
+                        <div class="item-info">
+                            <span class="item-name">🍹 Mojito</span>
+                            <span class="item-desc">Mint &amp; lime · On the rocks</span>
+                            <span class="item-price">₹70</span>
+                        </div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                        <span class="qty-count">0</span>
+                        <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                    </div>
+                </li>
+                <li class="menu-item" data-name="French Fries" data-price="70" style="flex:1 1 200px; margin-bottom:0;">
+                    <div class="item-details-block">
+                        <div class="item-image-fallback" style="background:#fef9c3; color:#b45309;">🍟</div>
+                        <div class="item-info">
+                            <span class="item-name">🍟 French Fries</span>
+                            <span class="item-desc">Golden &amp; crispy</span>
+                            <span class="item-price">₹70</span>
+                        </div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                        <span class="qty-count">0</span>
+                        <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- CART STRIP -->
+    <div class="cart-strip" id="cartStrip">
+        <div class="cart-details">
+            <span class="cart-count-text"><span id="totalItems">0</span> Items Selected</span>
+            <span class="cart-price-text">₹<span id="totalPrice">0</span></span>
+        </div>
+        <button class="btn-checkout" onclick="openCheckout()">
+            Proceed to Checkout
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        </button>
+    </div>
+
+    <!-- CHECKOUT MODAL -->
+    <div class="modal" id="checkoutModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeCheckout()">&times;</span>
+
+            <div id="formSection">
+                <h2>Your Order</h2>
+                <div class="summary-list" id="summaryList"></div>
+
+                <div class="qr-section-wrapper">
+                    <label style="display:block; font-weight:700; font-size:0.95rem; margin-bottom:10px; color:var(--primary-dark);">Scan &amp; Pay with any UPI App</label>
+                    <div class="qr-image-frame">
+                        <img id="upiQrCode" src="" alt="UPI Payment QR Code">
+                    </div>
+                    <div class="pay-buttons">
+                        <button type="button" class="btn-checkout" onclick="payNow()">💳 Pay with UPI</button>
+                        <button type="button" class="btn-checkout" onclick="confirmPaid()">✅ I've Paid</button>
+                    </div>
+                    <div class="qr-note-text">
+                        Please pay the exact grand total. <br>
+                        <strong>Note:</strong> After paying, click "I've Paid" and then submit your order.
+                    </div>
+                </div>
+
+                <form id="orderForm" onsubmit="sendWhatsApp(event)">
+                    <div class="form-group">
+                        <label>Order Type</label>
+                        <div class="order-type-toggle">
+                            <button type="button" id="deliveryTypeBtn" class="order-type-btn active" onclick="setOrderType('Delivery')">🛵 Delivery</button>
+                            <button type="button" id="pickupTypeBtn" class="order-type-btn" onclick="setOrderType('Pickup')">🏬 Self Pickup</button>
+                        </div>
+                        <input type="hidden" id="orderType" value="Delivery">
+                    </div>
+                    <div class="form-group">
+                        <label for="custName">Full Name</label>
+                        <input type="text" id="custName" required placeholder="Your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="custPhone">Phone Number</label>
+                        <input type="tel" id="custPhone" required placeholder="Contact number">
+                    </div>
+                    <div id="deliveryFields">
+                        <div class="form-group">
+                            <label for="custAddress">Delivery Address</label>
+                            <textarea id="custAddress" rows="3" placeholder="House number, Street, Landmark..."></textarea>
+                        </div>
+
+                        <!-- Map Picker with Search -->
+                        <div class="form-group">
+                            <label>Pin Location on Map (For Perfect Delivery)</label>
+                            <div id="map"></div>
+                            <div class="map-hint">👆 Tap or drag the map, or use the search box above to find your location</div>
+                            <input type="hidden" id="geoLink" value="">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="whatsappBtn" class="btn-whatsapp" disabled>
+                        <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397 0 11.948 0c3.179.001 6.164 1.24 8.409 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.907-11.891 11.907-2.013-.001-3.99-.51-5.732-1.485L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.965C16.528 1.937 14.068 1.937 11.4 1.937c-5.436 0-9.865 4.37-9.869 9.802-.001 1.74.48 3.43 1.39 4.966l-.993 3.624 3.719-.975z"/></svg>
+                        Submit Order &amp; Verify Payment
+                    </button>
+                </form>
+            </div>
+
+            <div id="successSection" class="success-screen">
+                <div class="success-icon">📲</div>
+                <h2>Order Ready for WhatsApp</h2>
+                <p id="successOrderId" style="font-weight:700; color:var(--primary-dark);"></p>
+                <p>Your order details have been prepared.</p>
+                <div class="order-badge" style="background:#dbeafe; border-color:#93c5fd; color:#1e3a8a; font-weight:800;">
+                    🔔 Tap "Send" in WhatsApp to complete your order
+                </div>
+                <p style="font-size:0.95rem; margin-bottom:16px; line-height:1.4;">
+                    WhatsApp will open with the pre‑filled message. <br>
+                    <strong>Just tap the send button</strong> – no extra typing needed!
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-bottom:20px;">
+                    <button class="copy-btn" onclick="copyOrderText()">📋 Copy Order Text</button>
+                </div>
+                <button class="btn-checkout" style="width:100%; justify-content:center;" onclick="closeCheckout(); resetCart();">Back to Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaflet.js + Geocoder -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.4.0/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // ── Cart state ──
+        let cart = {};
+
+        // ── UPI config (updated to 6381320381) ──
+        const MY_UPI_ID = "6381320381@upi";
+        const MERCHANT_NAME = "Me n Moms";
+        let paymentConfirmed = false;
+        let currentTotal = 0;
+        let orderTextForCopy = '';
+
+        // ── Map Globals ──
+        let map, marker;
+        const defaultLat = 20.5937;
+        const defaultLng = 78.9629;
+
+        // ── Pay with UPI ──
+        function payNow() {
+            const total = document.getElementById('totalPrice').innerText;
+            if (!total || total === '0') {
+                alert('Please add items to your cart first.');
+                return;
+            }
+            const upi =
+                `upi://pay?pa=${encodeURIComponent(MY_UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${total}&cu=INR`;
+            window.location.href = upi;
+            setTimeout(() => {
+                alert("After completing payment, return here and click 'I've Paid'.");
+            }, 500);
+        }
+
+        // ── Confirm Payment ──
+        function confirmPaid() {
+            paymentConfirmed = true;
+            const btn = document.getElementById('whatsappBtn');
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+            alert("Payment marked as completed. You can now send your order via WhatsApp.");
+        }
+
+        // ── Initialize Map with Search ──
+        function initMap() {
+            if (map) return;
+
+            map = L.map('map').setView([defaultLat, defaultLng], 5);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            marker = L.marker([defaultLat, defaultLng], { draggable: true }).addTo(map);
+
+            marker.on('dragend', function(e) {
+                updateCoordinates(marker.getLatLng().lat, marker.getLatLng().lng);
+            });
+
+            map.on('click', function(e) {
+                marker.setLatLng(e.latlng);
+                updateCoordinates(e.latlng.lat, e.latlng.lng);
+            });
+
+            // ── Add Geocoder Search Control ──
+            const geocoder = L.Control.geocoder({
+                defaultMarkGeocode: true,
+                position: 'topleft',
+                placeholder: 'Search for a place...',
+                errorMessage: 'Nothing found.'
+            }).on('markgeocode', function(e) {
+                const latlng = e.geocode.center;
+                marker.setLatLng(latlng);
+                map.setView(latlng, 16);
+                updateCoordinates(latlng.lat, latlng.lng);
+            }).addTo(map);
+
+            // Try geolocation
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    map.setView([userLat, userLng], 16);
+                    marker.setLatLng([userLat, userLng]);
+                    updateCoordinates(userLat, userLng);
+                }, function() {
+                    // fallback
+                    map.setView([13.0827, 80.2707], 12);
+                    marker.setLatLng([13.0827, 80.2707]);
+                    updateCoordinates(13.0827, 80.2707);
+                });
+            }
+        }
+
+        function updateCoordinates(lat, lng) {
+            document.getElementById('geoLink').value =
+                `https://maps.google.com/?q=${lat.toFixed(6)},${lng.toFixed(6)}`;
+        }
+
+        // ── Quantity handler ──
+        function changeQty(button, change) {
+            const menuItem = button.closest('.menu-item');
+            const name = menuItem.getAttribute('data-name');
+            const price = parseInt(menuItem.getAttribute('data-price'), 10);
+            const qtySpan = button.parentElement.querySelector('.qty-count');
+
+            let currentQty = parseInt(qtySpan.innerText, 10) || 0;
+            let newQty = currentQty + change;
+            if (newQty < 0) return;
+
+            qtySpan.innerText = newQty;
+
+            if (newQty === 0) {
+                delete cart[name];
+            } else {
+                cart[name] = { price, qty: newQty };
+            }
+
+            updateCartStrip();
+        }
+
+        // ── Update cart strip ──
+        function updateCartStrip() {
+            let totalItems = 0;
+            let totalPrice = 0;
+
+            for (const item in cart) {
+                totalItems += cart[item].qty;
+                totalPrice += cart[item].qty * cart[item].price;
+            }
+
+            document.getElementById('totalItems').innerText = totalItems;
+            document.getElementById('totalPrice').innerText = totalPrice;
+            currentTotal = totalPrice;
+        }
+
+        // ── Open checkout ──
+        // ── Order type (Delivery / Pickup) ──
+        function setOrderType(type) {
+            document.getElementById('orderType').value = type;
+            document.getElementById('deliveryTypeBtn').classList.toggle('active', type === 'Delivery');
+            document.getElementById('pickupTypeBtn').classList.toggle('active', type === 'Pickup');
+            document.getElementById('deliveryFields').style.display = (type === 'Delivery') ? 'block' : 'none';
+        }
+
+        // ── Order ID generator ──
+        let currentOrderId = null;
+        let currentOrderTimestamp = null;
+
+        function generateOrderId() {
+            const now = new Date();
+            const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const randomPart = Math.floor(1000 + Math.random() * 9000);
+            return `MNM-${datePart}-${randomPart}`;
+        }
+
+        function openCheckout() {
+            if (Object.keys(cart).length === 0) {
+                alert("Your cart is empty! Select some delicious momos first.");
+                return;
+            }
+
+            // Reset payment state
+            paymentConfirmed = false;
+            const btn = document.getElementById('whatsappBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+
+            // New order ID + timestamp for this checkout session
+            currentOrderId = generateOrderId();
+            currentOrderTimestamp = new Date();
+
+            setOrderType('Delivery');
+
+            document.getElementById('formSection').style.display = 'block';
+            document.getElementById('successSection').style.display = 'none';
+
+            const summaryList = document.getElementById('summaryList');
+            summaryList.innerHTML = '';
+            let finalTotal = 0;
+
+            for (const item in cart) {
+                const cost = cart[item].qty * cart[item].price;
+                finalTotal += cost;
+                summaryList.innerHTML += `
+                    <div class="summary-item">
+                        <span>${item} (×${cart[item].qty})</span>
+                        <span>₹${cost}</span>
+                    </div>
+                `;
+            }
+
+            summaryList.innerHTML += `
+                <div class="summary-item" style="font-weight:800; font-size:1.2rem; margin-top:18px; color:var(--primary-dark); padding-top:12px; border-top:1px solid #e2e8f0;">
+                    <span>Grand Total:</span>
+                    <span>₹${finalTotal}</span>
+                </div>
+            `;
+
+            const upiString =
+                `upi://pay?pa=${encodeURIComponent(MY_UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${finalTotal}&cu=INR`;
+            const qrImageUrl =
+                `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiString)}&choe=UTF-8`;
+            document.getElementById('upiQrCode').src = qrImageUrl;
+
+            document.getElementById('checkoutModal').style.display = 'flex';
+
+            // Initialize map after modal opens
+            setTimeout(initMap, 300);
+        }
+
+        // ── Close modal ──
+        function closeCheckout() {
+            document.getElementById('checkoutModal').style.display = 'none';
+        }
+
+        // ── Reset cart ──
+        function resetCart() {
+            cart = {};
+            paymentConfirmed = false;
+            currentOrderId = null;
+            currentOrderTimestamp = null;
+            updateCartStrip();
+            document.querySelectorAll('.qty-count').forEach(span => span.innerText = '0');
+            document.getElementById('orderForm').reset();
+            document.getElementById('geoLink').value = '';
+            setOrderType('Delivery');
+
+            const btn = document.getElementById('whatsappBtn');
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            btn.style.cursor = 'not-allowed';
+
+            if (marker) {
+                marker.setLatLng([defaultLat, defaultLng]);
+                updateCoordinates(defaultLat, defaultLng);
+            }
+        }
+
+        // ── Build order text ──
+        function buildOrderText() {
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const orderType = document.getElementById('orderType').value;
+            const address = document.getElementById('custAddress').value.trim();
+            const geoLink = document.getElementById('geoLink').value;
+
+            if (!currentOrderId) currentOrderId = generateOrderId();
+            if (!currentOrderTimestamp) currentOrderTimestamp = new Date();
+
+            const timeString = currentOrderTimestamp.toLocaleString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: true
+            });
+
+            let text = `*NEW ORDER - ME N MOMS* 🥟\n\n`;
+            text += `🧾 Order ID: ${currentOrderId}\n`;
+            text += `🕒 Placed: ${timeString}\n`;
+            text += `🚦 Order Type: *${orderType === 'Pickup' ? '🏬 Self Pickup' : '🛵 Delivery'}*\n\n`;
+            text += `*Customer Details:*\n`;
+            text += `👤 Name: ${name}\n`;
+            text += `📞 Phone: ${phone}\n`;
+            if (orderType === 'Delivery') {
+                text += `📍 Address: ${address}\n`;
+                if (geoLink) {
+                    text += `🗺️ Google Maps Pin: ${geoLink}\n`;
+                }
+            }
+            text += `\n*Order Summary:*\n`;
+
+            let finalTotal = 0;
+            for (const item in cart) {
+                const cost = cart[item].qty * cart[item].price;
+                finalTotal += cost;
+                text += `- ${item} × ${cart[item].qty} (₹${cost})\n`;
+            }
+
+            text += `\n💰 *Total Amount Paid via UPI: ₹${finalTotal}*`;
+            text += `\n\n_I am attaching my payment success screenshot right below this message!_ 📸`;
+
+            // ── Merchant quick-action buttons (Accept / Cancel) ──
+            const rawDigits = phone.replace(/\D/g, '');
+            const customerNumber = rawDigits.length === 10 ? `91${rawDigits}` : rawDigits;
+
+            const acceptMsg =
+                `Hello ${name},\n\nYour order with *Me n Moms* has been *ACCEPTED*! 🥟✨\n\n` +
+                `🕒 *Estimated Delivery Time:* 20 to 30 mins.\n` +
+                `Our delivery partner will call you once they reach your location.`;
+
+            const cancelMsg =
+                `Hello ${name},\n\nWe are extremely sorry, but your order with *Me n Moms* has been *CANCELLED* due to unforeseen circumstances. 😔\n\n` +
+                `💰 If your UPI transaction went through, your full refund will be processed immediately.`;
+
+            const acceptUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(acceptMsg)}`;
+            const cancelUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(cancelMsg)}`;
+
+            text += `\n--------------------------------------`;
+            text += `\n📋 *MERCHANT QUICK ACTIONS:*`;
+            text += `\n\n✅ *[ ACCEPT ORDER ]* 👇\n${acceptUrl}`;
+            text += `\n\n❌ *[ CANCEL ORDER ]* 👇\n${cancelUrl}`;
+            text += `\n--------------------------------------`;
+
+            return text;
+        }
+
+        // ── Copy order text ──
+        function copyOrderText() {
+            const text = buildOrderText();
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Order details copied to clipboard! You can paste them into WhatsApp manually.');
+            }).catch(() => {
+                alert('Could not copy. Please copy the text manually.');
+            });
+        }
+
+        // ── Send WhatsApp (updated to 6381320381) ──
+        function sendWhatsApp(event) {
+            event.preventDefault();
+
+            if (!paymentConfirmed) {
+                alert('Please click "I\'ve Paid" after completing your UPI payment.');
+                return;
+            }
+
+            const name = document.getElementById('custName').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const orderType = document.getElementById('orderType').value;
+            const address = document.getElementById('custAddress').value.trim();
+
+            if (!name || !phone) {
+                alert('Please fill in all fields.');
+                return;
+            }
+            if (orderType === 'Delivery' && !address) {
+                alert('Please enter a delivery address, or switch to Self Pickup.');
+                return;
+            }
+
+            const orderText = buildOrderText();
+            orderTextForCopy = orderText;
+
+            // Open WhatsApp with pre-filled message
+            const whatsappUrl =
+                `https://wa.me/916381320381?text=${encodeURIComponent(orderText)}`;
+            window.open(whatsappUrl, '_blank');
+
+            // Show success screen with instruction to tap Send
+            document.getElementById('successOrderId').innerText = `🧾 Order ID: ${currentOrderId}`;
+            document.getElementById('formSection').style.display = 'none';
+            document.getElementById('successSection').style.display = 'block';
+        }
+
+        // ── Auto-update cart on load ──
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCartStrip();
+        });
+    </script>
+
+</body>
+</html>
