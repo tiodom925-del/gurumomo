@@ -1301,22 +1301,36 @@
             const customerNumber = rawDigits.length === 10 ? `91${rawDigits}` : rawDigits;
             const formattedPhone = `+${customerNumber}`;
 
-            let text = `*NEW ORDER - ME N MOMS* 🥟\n\n`;
-            text += `🧾 Order ID: ${currentOrderId}\n`;
-            text += `🕒 Placed: ${timeString}\n`;
-            text += `🚦 Order Type: *${orderType === 'Pickup' ? '🏬 Self Pickup' : '🛵 Delivery'}*\n\n`;
+            // Emoji written as \u{...} escapes (not literal characters) so the
+            // codepoints survive no matter how this file gets saved/hosted/edited —
+            // literal emoji glyphs are what turn into "�" if any step in that chain
+            // isn't strictly UTF-8.
+            const E = {
+                dumpling: '\u{1F95F}', clock: '\u{1F552}', ticket: '\u{1F9FE}',
+                lights: '\u{1F6A6}', shop: '\u{1F3EC}', scooter: '\u{1F6F5}',
+                person: '\u{1F464}', phone: '\u{1F4DE}', pin: '\u{1F4CD}',
+                map: '\u{1F5FA}\u{FE0F}', money: '\u{1F4B0}', card: '\u{1F4B3}',
+                camera: '\u{1F4F8}', clipboard: '\u{1F4CB}', check: '\u{2705}',
+                cross: '\u{274C}', chat: '\u{1F4AC}', pointDown: '\u{1F447}',
+                sad: '\u{1F614}', sparkle: '\u{2728}'
+            };
+
+            let text = `*NEW ORDER - ME N MOMS* ${E.dumpling}\n\n`;
+            text += `${E.ticket} Order ID: ${currentOrderId}\n`;
+            text += `${E.clock} Placed: ${timeString}\n`;
+            text += `${E.lights} Order Type: *${orderType === 'Pickup' ? E.shop + ' Self Pickup' : E.scooter + ' Delivery'}*\n\n`;
             text += `*Customer Details:*\n`;
-            text += `👤 Name: ${name}\n`;
-            text += `📞 Phone: ${formattedPhone}\n`;
+            text += `${E.person} Name: ${name}\n`;
+            text += `${E.phone} Phone: ${formattedPhone}\n`;
             if (orderType === 'Delivery') {
-                text += `📍 Address: ${address}\n`;
+                text += `${E.pin} Address: ${address}\n`;
                 if (geoLink) {
-                    text += `🗺️ Google Maps Pin: ${geoLink}\n`;
+                    text += `${E.map} Google Maps Pin: ${geoLink}\n`;
                 }
             } else {
                 text += `\n*Pickup Location:*\n`;
                 text += `27, See Ranga Nilayam, 4-Way Road, Thirukovilur - 605757 (Opposite Makkal Medical)\n`;
-                text += `🗺️ Google Maps: https://www.google.com/maps?q=11.970611,79.208472\n`;
+                text += `${E.map} Google Maps: https://www.google.com/maps?q=11.970611,79.208472\n`;
             }
             text += `\n*Order Summary:*\n`;
 
@@ -1327,31 +1341,40 @@
                 text += `- ${item} × ${cart[item].qty} (₹${cost})\n`;
             }
 
-            text += `\n💰 *Total Amount: ₹${finalTotal}*`;
-            text += `\n💳 *Payment Method: ${paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid via UPI'}*`;
+            text += `\n${E.money} *Total Amount: ₹${finalTotal}*`;
+            text += `\n${E.card} *Payment Method: ${paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid via UPI'}*`;
             if (paymentMethod === 'UPI') {
-                text += `\n\n_I am attaching my payment success screenshot right below this message!_ 📸`;
+                text += `\n\n_I am attaching my payment success screenshot right below this message!_ ${E.camera}`;
             }
 
-            // ── Merchant quick-action buttons (Accept / Cancel) ──
+            // ── Merchant quick-action buttons (Accept / Cancel / Chat) ──
             const acceptMsg =
-                `Hello ${name},\n\nYour order with *Me n Moms* has been *ACCEPTED*! 🥟✨\n\n` +
-                `🕒 *Estimated Delivery Time:* 20 to 30 mins.\n` +
+                `Your order with *Me n Moms* has been *ACCEPTED*! ${E.dumpling}${E.sparkle} ` +
+                `${E.clock} *Estimated Delivery Time:* 20 to 30 mins. ` +
                 `Our delivery partner will call you once they reach your location.`;
 
             const cancelMsg =
-                `Hello ${name},\n\nWe are extremely sorry, but your order with *Me n Moms* has been *CANCELLED* due to unforeseen circumstances. 😔\n\n` +
+                `Hello ${name},\n\nWe are extremely sorry, but your order with *Me n Moms* has been *CANCELLED* due to unforeseen circumstances. ${E.sad}\n\n` +
                 (paymentMethod === 'UPI'
-                    ? `💰 If your UPI transaction went through, your full refund will be processed immediately.`
+                    ? `${E.money} If your UPI transaction went through, your full refund will be processed immediately.`
                     : `No payment has been collected, so there's nothing to refund.`);
+
+            const chatMsg = `Hi`;
 
             const acceptUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(acceptMsg)}`;
             const cancelUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(cancelMsg)}`;
+            const chatUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(chatMsg)}`;
 
+            // NOTE: WhatsApp text has no real font-size control (no HTML/CSS) —
+            // only *bold*, _italic_, ~strike~, ```monospace```. The closest visual
+            // trick is: bold the action labels, and leave the raw link COMPLETELY
+            // unformatted on its own line. Bold markers around a URL can also break
+            // WhatsApp's auto-link detection, so links are intentionally left plain.
             text += `\n--------------------------------------`;
-            text += `\n📋 *MERCHANT QUICK ACTIONS:*`;
-            text += `\n\n✅ *[ ACCEPT ORDER ]* 👇\n${acceptUrl}`;
-            text += `\n\n❌ *[ CANCEL ORDER ]* 👇\n${cancelUrl}`;
+            text += `\n${E.clipboard} *MERCHANT QUICK ACTIONS:*`;
+            text += `\n\n${E.check} *Accept Order*\n${acceptUrl}`;
+            text += `\n\n${E.cross} *Cancel Order*\n${cancelUrl}`;
+            text += `\n\n${E.chat} *Chat Customer*\n${chatUrl}`;
             text += `\n--------------------------------------`;
 
             return text;
