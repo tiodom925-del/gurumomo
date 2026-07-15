@@ -633,6 +633,12 @@
             padding: 10px 18px;
         }
 
+        #upiMethodBtn.active,
+        #codMethodBtn.active {
+            outline: 3px solid var(--primary-dark);
+            outline-offset: 2px;
+        }
+
         .success-screen {
             display: none;
             text-align: center;
@@ -694,8 +700,8 @@
 </head>
 <body>
 
-    <!-- Floating Call Button — updated to 6381320381 -->
-    <a href="tel:6381320381" class="floating-call-btn">
+    <!-- Floating Call Button — updated to 9360502612 -->
+    <a href="tel:9360502612" class="floating-call-btn">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
         </svg>
@@ -911,17 +917,30 @@
                 <div class="summary-list" id="summaryList"></div>
 
                 <div class="qr-section-wrapper">
-                    <label style="display:block; font-weight:700; font-size:0.95rem; margin-bottom:10px; color:var(--primary-dark);">Scan &amp; Pay with any UPI App</label>
-                    <div class="qr-image-frame">
-                        <img id="upiQrCode" src="" alt="UPI Payment QR Code">
-                    </div>
+                    <label style="display:block; font-weight:700; font-size:0.95rem; margin-bottom:10px; color:var(--primary-dark);">Choose Payment Method</label>
                     <div class="pay-buttons">
-                        <button type="button" class="btn-checkout" onclick="payNow()">💳 Pay with UPI</button>
-                        <button type="button" class="btn-checkout" onclick="confirmPaid()">✅ I've Paid</button>
+                        <button type="button" id="upiMethodBtn" class="btn-checkout" onclick="selectPaymentMethod('UPI')">💳 Pay with UPI</button>
+                        <button type="button" id="codMethodBtn" class="btn-checkout" onclick="selectPaymentMethod('COD')">💵 Cash on Delivery</button>
                     </div>
-                    <div class="qr-note-text">
-                        Please pay the exact grand total. <br>
-                        <strong>Note:</strong> After paying, click "I've Paid" and then submit your order.
+
+                    <div id="upiPaymentBlock" style="margin-top:16px;">
+                        <div class="qr-image-frame">
+                            <img id="upiQrCode" src="" alt="UPI Payment QR Code">
+                        </div>
+                        <div class="pay-buttons">
+                            <button type="button" class="btn-checkout" onclick="payNow()">💳 Pay with UPI</button>
+                            <button type="button" class="btn-checkout" onclick="confirmPaid()">✅ I've Paid</button>
+                        </div>
+                        <div class="qr-note-text">
+                            Please pay the exact grand total. <br>
+                            <strong>Note:</strong> After paying, click "I've Paid" and then submit your order.
+                        </div>
+                    </div>
+
+                    <div id="codPaymentBlock" style="display:none; margin-top:16px;">
+                        <div style="background:var(--accent-light); border:1px solid #fde68a; border-radius:14px; padding:16px; font-weight:600; color:var(--primary-dark); text-align:center;">
+                            💵 You've selected <strong>Cash on Delivery</strong>. Please keep the exact amount ready — pay in cash when your order arrives (or at pickup).
+                        </div>
                     </div>
                 </div>
 
@@ -1006,12 +1025,35 @@
         // ── Cart state ──
         let cart = {};
 
-        // ── UPI config (updated to 6381320381) ──
-        const MY_UPI_ID = "6381320381@upi";
-        const MERCHANT_NAME = "Me n Moms";
+        // ── UPI config (updated to 9360502612) ──
+        const MY_UPI_ID = "7418358588@superyes";
+        const MERCHANT_NAME = "Senthilguru Sundharrajan";
         let paymentConfirmed = false;
+        let paymentMethod = 'UPI';
         let currentTotal = 0;
         let orderTextForCopy = '';
+
+        // ── Select Payment Method ──
+        function selectPaymentMethod(method) {
+            paymentMethod = method;
+            document.getElementById('upiMethodBtn').classList.toggle('active', method === 'UPI');
+            document.getElementById('codMethodBtn').classList.toggle('active', method === 'COD');
+            document.getElementById('upiPaymentBlock').style.display = (method === 'UPI') ? 'block' : 'none';
+            document.getElementById('codPaymentBlock').style.display = (method === 'COD') ? 'block' : 'none';
+
+            const btn = document.getElementById('whatsappBtn');
+            if (method === 'COD') {
+                paymentConfirmed = true;
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            } else {
+                paymentConfirmed = false;
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'not-allowed';
+            }
+        }
 
         // ── Map Globals ──
         let map, marker;
@@ -1165,11 +1207,7 @@
             }
 
             // Reset payment state
-            paymentConfirmed = false;
-            const btn = document.getElementById('whatsappBtn');
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            btn.style.cursor = 'not-allowed';
+            selectPaymentMethod('UPI');
 
             // New order ID + timestamp for this checkout session
             currentOrderId = generateOrderId();
@@ -1205,7 +1243,7 @@
             const upiString =
                 `upi://pay?pa=${encodeURIComponent(MY_UPI_ID)}&pn=${encodeURIComponent(MERCHANT_NAME)}&am=${finalTotal}&cu=INR`;
             const qrImageUrl =
-                `https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=${encodeURIComponent(upiString)}&choe=UTF-8`;
+                `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiString)}`;
             document.getElementById('upiQrCode').src = qrImageUrl;
 
             document.getElementById('checkoutModal').style.display = 'flex';
@@ -1222,7 +1260,6 @@
         // ── Reset cart ──
         function resetCart() {
             cart = {};
-            paymentConfirmed = false;
             currentOrderId = null;
             currentOrderTimestamp = null;
             updateCartStrip();
@@ -1230,11 +1267,7 @@
             document.getElementById('orderForm').reset();
             document.getElementById('geoLink').value = '';
             setOrderType('Delivery');
-
-            const btn = document.getElementById('whatsappBtn');
-            btn.disabled = true;
-            btn.style.opacity = '0.6';
-            btn.style.cursor = 'not-allowed';
+            selectPaymentMethod('UPI');
 
             if (marker) {
                 marker.setLatLng([defaultLat, defaultLng]);
@@ -1284,8 +1317,11 @@
                 text += `- ${item} × ${cart[item].qty} (₹${cost})\n`;
             }
 
-            text += `\n💰 *Total Amount Paid via UPI: ₹${finalTotal}*`;
-            text += `\n\n_I am attaching my payment success screenshot right below this message!_ 📸`;
+            text += `\n💰 *Total Amount: ₹${finalTotal}*`;
+            text += `\n💳 *Payment Method: ${paymentMethod === 'COD' ? 'Cash on Delivery' : 'Paid via UPI'}*`;
+            if (paymentMethod === 'UPI') {
+                text += `\n\n_I am attaching my payment success screenshot right below this message!_ 📸`;
+            }
 
             // ── Merchant quick-action buttons (Accept / Cancel) ──
             const rawDigits = phone.replace(/\D/g, '');
@@ -1298,7 +1334,9 @@
 
             const cancelMsg =
                 `Hello ${name},\n\nWe are extremely sorry, but your order with *Me n Moms* has been *CANCELLED* due to unforeseen circumstances. 😔\n\n` +
-                `💰 If your UPI transaction went through, your full refund will be processed immediately.`;
+                (paymentMethod === 'UPI'
+                    ? `💰 If your UPI transaction went through, your full refund will be processed immediately.`
+                    : `No payment has been collected, so there's nothing to refund.`);
 
             const acceptUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(acceptMsg)}`;
             const cancelUrl = `https://wa.me/${customerNumber}?text=${encodeURIComponent(cancelMsg)}`;
@@ -1322,12 +1360,12 @@
             });
         }
 
-        // ── Send WhatsApp (updated to 6381320381) ──
+        // ── Send WhatsApp (updated to 9360502612) ──
         function sendWhatsApp(event) {
             event.preventDefault();
 
             if (!paymentConfirmed) {
-                alert('Please click "I\'ve Paid" after completing your UPI payment.');
+                alert('Please click "I\'ve Paid" after completing your UPI payment, or choose Cash on Delivery.');
                 return;
             }
 
@@ -1350,7 +1388,7 @@
 
             // Open WhatsApp with pre-filled message
             const whatsappUrl =
-                `https://wa.me/916381320381?text=${encodeURIComponent(orderText)}`;
+                `https://wa.me/919360502612?text=${encodeURIComponent(orderText)}`;
             window.open(whatsappUrl, '_blank');
 
             // Show success screen with instruction to tap Send
