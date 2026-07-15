@@ -798,6 +798,21 @@
                             <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
                         </div>
                     </li>
+                    <li class="menu-item" data-name="Peri Peri Chicken Momos" data-price="80">
+                        <div class="item-details-block">
+                            <img src="peri-peri-momos.jpg" alt="Peri Peri Chicken Momos" class="item-image" onerror="this.style.display='none'">
+                            <div class="item-info">
+                                <span class="item-name">🌶️ Peri Peri Chicken Momos</span>
+                                <span class="item-desc">Fried &amp; tossed in peri peri spice</span>
+                                <span class="item-price">₹80</span>
+                            </div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                            <span class="qty-count">0</span>
+                            <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -839,6 +854,36 @@
                         <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
                     </div>
                 </li>
+                <li class="menu-item" data-name="Mountain Dew" data-price="45" style="flex:1 1 200px; margin-bottom:0;">
+                    <div class="item-details-block">
+                        <img src="mountain-dew.jpg" alt="Mountain Dew" class="item-image" onerror="this.style.display='none'">
+                        <div class="item-info">
+                            <span class="item-name">🥤 Mountain Dew</span>
+                            <span class="item-desc">Chilled &amp; fizzy</span>
+                            <span class="item-price">₹45</span>
+                        </div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                        <span class="qty-count">0</span>
+                        <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                    </div>
+                </li>
+                <li class="menu-item" data-name="Pepsi" data-price="45" style="flex:1 1 200px; margin-bottom:0;">
+                    <div class="item-details-block">
+                        <img src="pepsi.jpg" alt="Pepsi" class="item-image" onerror="this.style.display='none'">
+                        <div class="item-info">
+                            <span class="item-name">🥤 Pepsi</span>
+                            <span class="item-desc">Chilled &amp; fizzy</span>
+                            <span class="item-price">₹45</span>
+                        </div>
+                    </div>
+                    <div class="quantity-controls">
+                        <button class="btn-qty" onclick="changeQty(this, -1)">−</button>
+                        <span class="qty-count">0</span>
+                        <button class="btn-qty" onclick="changeQty(this, 1)">+</button>
+                    </div>
+                </li>
             </ul>
         </div>
 
@@ -865,16 +910,7 @@
                 <h2>Your Order</h2>
                 <div class="summary-list" id="summaryList"></div>
 
-                <div class="form-group">
-                    <label>Payment Method</label>
-                    <div class="order-type-toggle">
-                        <button type="button" id="upiPaymentBtn" class="order-type-btn active" onclick="setPaymentMethod('UPI')">💳 Pay Online (UPI)</button>
-                        <button type="button" id="codPaymentBtn" class="order-type-btn" onclick="setPaymentMethod('COD')">💵 Cash on Delivery</button>
-                    </div>
-                    <input type="hidden" id="paymentMethod" value="UPI">
-                </div>
-
-                <div class="qr-section-wrapper" id="qrSectionWrapper">
+                <div class="qr-section-wrapper">
                     <label style="display:block; font-weight:700; font-size:0.95rem; margin-bottom:10px; color:var(--primary-dark);">Scan &amp; Pay with any UPI App</label>
                     <div class="qr-image-frame">
                         <img id="upiQrCode" src="" alt="UPI Payment QR Code">
@@ -887,10 +923,6 @@
                         Please pay the exact grand total. <br>
                         <strong>Note:</strong> After paying, click "I've Paid" and then submit your order.
                     </div>
-                </div>
-
-                <div class="qr-note-text" id="codNoteText" style="display:none; text-align:center; background:#f8fafc; border:1px solid #e2e8f0; padding:16px; border-radius:18px; margin-bottom:20px;">
-                    💵 <strong>Cash on Delivery selected.</strong> Please keep the exact amount ready for our delivery partner.
                 </div>
 
                 <form id="orderForm" onsubmit="sendWhatsApp(event)">
@@ -922,6 +954,20 @@
                             <div id="map"></div>
                             <div class="map-hint">👆 Tap or drag the map, or use the search box above to find your location</div>
                             <input type="hidden" id="geoLink" value="">
+                        </div>
+                    </div>
+
+                    <div id="pickupFields" style="display:none;">
+                        <div class="form-group">
+                            <label>🏬 Pickup Location</label>
+                            <div style="background:var(--accent-light); border:1px solid #fde68a; border-radius:14px; padding:16px; font-weight:600; color:var(--primary-dark); line-height:1.5;">
+                                27, See Ranga Nilayam, 4-Way Road,<br>
+                                Thirukovilur - 605757<br>
+                                (Opposite Makkal Medical)
+                                <div style="margin-top:10px;">
+                                    <a href="https://www.google.com/maps?q=11.970611,79.208472" target="_blank" rel="noopener" style="color:var(--primary); font-weight:700; text-decoration:none;">📍 View on Google Maps</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -985,28 +1031,6 @@
             setTimeout(() => {
                 alert("After completing payment, return here and click 'I've Paid'.");
             }, 500);
-        }
-
-        // ── Payment Method (UPI / Cash on Delivery) ──
-        function setPaymentMethod(method) {
-            document.getElementById('paymentMethod').value = method;
-            document.getElementById('upiPaymentBtn').classList.toggle('active', method === 'UPI');
-            document.getElementById('codPaymentBtn').classList.toggle('active', method === 'COD');
-            document.getElementById('qrSectionWrapper').style.display = (method === 'UPI') ? 'block' : 'none';
-            document.getElementById('codNoteText').style.display = (method === 'COD') ? 'block' : 'none';
-
-            const btn = document.getElementById('whatsappBtn');
-            if (method === 'COD') {
-                // No online payment needed — enable submit right away
-                btn.disabled = false;
-                btn.style.opacity = '1';
-                btn.style.cursor = 'pointer';
-            } else {
-                // Back to UPI — require payment confirmation again
-                btn.disabled = !paymentConfirmed;
-                btn.style.opacity = paymentConfirmed ? '1' : '0.6';
-                btn.style.cursor = paymentConfirmed ? 'pointer' : 'not-allowed';
-            }
         }
 
         // ── Confirm Payment ──
@@ -1120,6 +1144,7 @@
             document.getElementById('deliveryTypeBtn').classList.toggle('active', type === 'Delivery');
             document.getElementById('pickupTypeBtn').classList.toggle('active', type === 'Pickup');
             document.getElementById('deliveryFields').style.display = (type === 'Delivery') ? 'block' : 'none';
+            document.getElementById('pickupFields').style.display = (type === 'Pickup') ? 'block' : 'none';
         }
 
         // ── Order ID generator ──
@@ -1151,7 +1176,6 @@
             currentOrderTimestamp = new Date();
 
             setOrderType('Delivery');
-            setPaymentMethod('UPI');
 
             document.getElementById('formSection').style.display = 'block';
             document.getElementById('successSection').style.display = 'none';
@@ -1206,7 +1230,6 @@
             document.getElementById('orderForm').reset();
             document.getElementById('geoLink').value = '';
             setOrderType('Delivery');
-            setPaymentMethod('UPI');
 
             const btn = document.getElementById('whatsappBtn');
             btn.disabled = true;
@@ -1224,7 +1247,6 @@
             const name = document.getElementById('custName').value.trim();
             const phone = document.getElementById('custPhone').value.trim();
             const orderType = document.getElementById('orderType').value;
-            const paymentMethod = document.getElementById('paymentMethod').value;
             const address = document.getElementById('custAddress').value.trim();
             const geoLink = document.getElementById('geoLink').value;
 
@@ -1248,6 +1270,10 @@
                 if (geoLink) {
                     text += `🗺️ Google Maps Pin: ${geoLink}\n`;
                 }
+            } else {
+                text += `\n*Pickup Location:*\n`;
+                text += `27, See Ranga Nilayam, 4-Way Road, Thirukovilur - 605757 (Opposite Makkal Medical)\n`;
+                text += `🗺️ Google Maps: https://www.google.com/maps?q=11.970611,79.208472\n`;
             }
             text += `\n*Order Summary:*\n`;
 
@@ -1258,14 +1284,8 @@
                 text += `- ${item} × ${cart[item].qty} (₹${cost})\n`;
             }
 
-            if (paymentMethod === 'COD') {
-                text += `\n💵 *Payment Method: Cash on Delivery*`;
-                text += `\n💰 *Amount to Collect: ₹${finalTotal}*`;
-            } else {
-                text += `\n💳 *Payment Method: UPI (Paid Online)*`;
-                text += `\n💰 *Total Amount Paid via UPI: ₹${finalTotal}*`;
-                text += `\n\n_I am attaching my payment success screenshot right below this message!_ 📸`;
-            }
+            text += `\n💰 *Total Amount Paid via UPI: ₹${finalTotal}*`;
+            text += `\n\n_I am attaching my payment success screenshot right below this message!_ 📸`;
 
             // ── Merchant quick-action buttons (Accept / Cancel) ──
             const rawDigits = phone.replace(/\D/g, '');
@@ -1306,10 +1326,8 @@
         function sendWhatsApp(event) {
             event.preventDefault();
 
-            const paymentMethod = document.getElementById('paymentMethod').value;
-
-            if (paymentMethod === 'UPI' && !paymentConfirmed) {
-                alert('Please click "I\'ve Paid" after completing your UPI payment, or switch to Cash on Delivery.');
+            if (!paymentConfirmed) {
+                alert('Please click "I\'ve Paid" after completing your UPI payment.');
                 return;
             }
 
