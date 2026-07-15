@@ -967,6 +967,10 @@
                             <textarea id="custAddress" rows="3" placeholder="House number, Street, Landmark..."></textarea>
                         </div>
 
+                        <div style="background:var(--accent-light); border:1px solid #fde68a; border-radius:14px; padding:14px 16px; font-size:0.9rem; font-weight:600; color:var(--primary-dark); line-height:1.5; margin-bottom:20px;">
+                            📌 <strong>Note:</strong> Delivery fee is ₹30 within a 5 km range. Beyond 5 km, delivery charges may be higher.
+                        </div>
+
                         <!-- Map Picker with Search -->
                         <div class="form-group">
                             <label>Pin Location on Map (For Perfect Delivery)</label>
@@ -1291,13 +1295,19 @@
                 hour: '2-digit', minute: '2-digit', hour12: true
             });
 
+            // Format phone with country code so WhatsApp auto-detects it as a
+            // tappable number (tap-to-call / tap-to-message) inside the chat.
+            const rawDigits = phone.replace(/\D/g, '');
+            const customerNumber = rawDigits.length === 10 ? `91${rawDigits}` : rawDigits;
+            const formattedPhone = `+${customerNumber}`;
+
             let text = `*NEW ORDER - ME N MOMS* 🥟\n\n`;
             text += `🧾 Order ID: ${currentOrderId}\n`;
             text += `🕒 Placed: ${timeString}\n`;
             text += `🚦 Order Type: *${orderType === 'Pickup' ? '🏬 Self Pickup' : '🛵 Delivery'}*\n\n`;
             text += `*Customer Details:*\n`;
             text += `👤 Name: ${name}\n`;
-            text += `📞 Phone: ${phone}\n`;
+            text += `📞 Phone: ${formattedPhone}\n`;
             if (orderType === 'Delivery') {
                 text += `📍 Address: ${address}\n`;
                 if (geoLink) {
@@ -1324,9 +1334,6 @@
             }
 
             // ── Merchant quick-action buttons (Accept / Cancel) ──
-            const rawDigits = phone.replace(/\D/g, '');
-            const customerNumber = rawDigits.length === 10 ? `91${rawDigits}` : rawDigits;
-
             const acceptMsg =
                 `Hello ${name},\n\nYour order with *Me n Moms* has been *ACCEPTED*! 🥟✨\n\n` +
                 `🕒 *Estimated Delivery Time:* 20 to 30 mins.\n` +
