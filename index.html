@@ -1348,16 +1348,22 @@
             }
 
             // ── Merchant quick-action buttons (Accept / Cancel / Chat) ──
+            // NOTE: iOS WhatsApp only auto-linkifies a wa.me URL up to roughly
+            // ~170 total characters (measured from the actual failure — the
+            // link stopped being tappable mid-message). Emojis are the biggest
+            // offender (each one expands to 9-12 characters, e.g. 🥟 → %F0%9F%A5%9F
+            // once URL-encoded) and newlines add more on top. So these two
+            // messages are kept short, plain, and emoji-free, with real margin
+            // below that cutoff — the phone number length also varies, so don't
+            // let these creep back up toward ~140+ encoded characters.
             const acceptMsg =
-                `Your order with *Me n Moms* has been *ACCEPTED*! ${E.dumpling}${E.sparkle} ` +
-                `${E.clock} *Estimated Time:* 20 to 30 mins. ` +
-                `Our delivery partner will call you once they reach your location.`;
+                `Your order with Me n Moms has been ACCEPTED! ETA 20-30 mins.`;
 
             const cancelMsg =
-                `Hello ${name},\n\nWe are extremely sorry, but your order with *Me n Moms* has been *CANCELLED* due to unforeseen circumstances. ${E.sad}\n\n` +
+                `Hi ${name}, sorry your order with Me n Moms was CANCELLED. ` +
                 (paymentMethod === 'UPI'
-                    ? `${E.money} If your UPI transaction went through, your full refund will be processed immediately.`
-                    : `No payment has been collected, so there's nothing to refund.`);
+                    ? `Your UPI refund will be processed.`
+                    : `No payment was collected.`);
 
             const chatMsg = `Hi`;
 
